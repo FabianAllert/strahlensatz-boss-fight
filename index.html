@@ -56,8 +56,11 @@ input{font-family:inherit}
 .round-info{display:flex;gap:2rem;font-size:clamp(.85rem,2vw,1.1rem);color:var(--dim);margin-bottom:.3rem}
 .round-info span{display:flex;align-items:center;gap:.3rem}
 
+.seg { text-decoration: overline; display: inline; }
+
 /* Question area */
 .question-area{width:100%;flex:1;display:flex;flex-direction:column;align-items:center;padding:0 1rem;overflow:hidden}
+.svg-container{width:100%;display:flex;justify-content:center;margin:0.5rem 0}
 .question-text{font-size:clamp(1rem,3vw,1.6rem);text-align:center;padding:.6rem;line-height:1.5;max-width:800px}
 .options-grid{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;width:min(95%,700px);margin-top:.5rem}
 .option-card{background:var(--bg2);border:2px solid #444;border-radius:12px;padding:.7rem 1rem;font-size:clamp(.85rem,2.2vw,1.2rem);display:flex;align-items:center;gap:.6rem;transition:border-color .2s,background .2s}
@@ -104,7 +107,6 @@ input{font-family:inherit}
 .player-feedback.correct-fb{color:var(--heal)}
 .player-feedback.wrong-fb{color:var(--accent)}
 .player-waiting{color:var(--dim);font-size:1rem;text-align:center}
-.player-hp-mini{font-size:.85rem;color:var(--dim);margin-top:auto;padding-bottom:1rem}
 
 /* --- Victory --- */
 #victory{gap:1rem}
@@ -153,12 +155,6 @@ input{font-family:inherit}
   50%{transform:scale(1.05)}
 }
 .pulse{animation:pulse 1.5s infinite}
-
-/* Difficulty badge */
-.diff-badge{display:inline-block;padding:.15rem .6rem;border-radius:20px;font-size:.75rem;font-weight:700;margin-bottom:.3rem}
-.diff-badge.afb1{background:var(--heal);color:#111}
-.diff-badge.afb2{background:var(--gold);color:#111}
-.diff-badge.afb3{background:var(--accent);color:#fff}
 </style>
 </head>
 <body>
@@ -207,8 +203,8 @@ input{font-family:inherit}
     </div>
   </div>
   <div class="question-area">
-    <span class="diff-badge" id="host-diff-badge">AFB I</span>
     <div class="question-text" id="host-question"></div>
+    <div id="host-svg" class="svg-container"></div>
     <div class="options-grid" id="host-options"></div>
     <div class="explanation-box" id="host-explanation" style="display:none"></div>
     <div class="timer-bar-container" id="timer-container">
@@ -231,12 +227,11 @@ input{font-family:inherit}
 
 <!-- ====== PLAYER GAME ====== -->
 <div id="player-game" class="screen">
-  <span class="diff-badge" id="player-diff-badge">AFB I</span>
   <div class="player-question" id="player-question">Warte auf die nächste Frage...</div>
+  <div id="player-svg" class="svg-container"></div>
   <div class="player-options" id="player-options"></div>
   <div class="player-feedback" id="player-feedback"></div>
   <div class="player-waiting" id="player-waiting"></div>
-  <div class="player-hp-mini" id="player-hp-mini"></div>
 </div>
 
 <!-- ====== VICTORY ====== -->
@@ -271,88 +266,88 @@ input{font-family:inherit}
 // ===================== QUESTIONS =====================
 const questions = [
   {
-    difficulty: 1,
-    question: 'V-Figur: ZA = 4, ZA\u2032 = 12, ZB = 5.<br>Wie lang ist ZB\u2032?',
+    question: 'V-Figur: <span class="seg">ZA</span> = 4, <span class="seg">ZA\'</span> = 12, <span class="seg">ZB</span> = 5.<br>Wie lang ist <span class="seg">ZB\'</span>?',
     options: ['10', '15', '20', '7'],
     correct: 1,
-    explanation: 'ZA / ZA\u2032 = ZB / ZB\u2032 \u2192 4/12 = 5/ZB\u2032 \u2192 ZB\u2032 = 15'
+    explanation: '<span class="seg">ZA</span> / <span class="seg">ZA\'</span> = <span class="seg">ZB</span> / <span class="seg">ZB\'</span> \u2192 4/12 = 5/x \u2192 x = 15',
+    svg: '<svg viewBox="0 0 240 130" width="100%" style="max-width:280px;height:auto"><line x1="20" y1="20" x2="220" y2="40" stroke="#aaa" stroke-width="2"/><line x1="20" y1="20" x2="220" y2="110" stroke="#aaa" stroke-width="2"/><line x1="80" y1="26" x2="80" y2="47" stroke="#aaa" stroke-width="2" stroke-dasharray="4 3"/><line x1="180" y1="36" x2="180" y2="92" stroke="#aaa" stroke-width="2" stroke-dasharray="4 3"/><circle cx="20" cy="20" r="3" fill="#f0c040"/><text x="15" y="15" fill="#eee" font-size="11">Z</text><text x="75" y="20" fill="#eee" font-size="11">A</text><text x="175" y="30" fill="#eee" font-size="11">A\'</text><text x="75" y="62" fill="#eee" font-size="11">B</text><text x="175" y="107" fill="#eee" font-size="11">B\'</text></svg>'
   },
   {
-    difficulty: 1,
-    question: 'X-Figur: ZA = 6, ZA\u2032 = 3, ZB = 10.<br>Wie lang ist ZB\u2032?',
+    question: 'X-Figur: <span class="seg">ZA</span> = 6, <span class="seg">ZA\'</span> = 3, <span class="seg">ZB</span> = 10.<br>Wie lang ist <span class="seg">ZB\'</span>?',
     options: ['5', '20', '8', '15'],
     correct: 0,
-    explanation: 'ZA / ZA\u2032 = ZB / ZB\u2032 \u2192 6/3 = 10/ZB\u2032 \u2192 ZB\u2032 = 5'
+    explanation: '<span class="seg">ZA</span> / <span class="seg">ZA\'</span> = <span class="seg">ZB</span> / <span class="seg">ZB\'</span> \u2192 6/3 = 10/x \u2192 x = 5',
+    svg: '<svg viewBox="0 0 240 130" width="100%" style="max-width:280px;height:auto"><line x1="40" y1="30" x2="200" y2="100" stroke="#aaa" stroke-width="2"/><line x1="40" y1="100" x2="200" y2="30" stroke="#aaa" stroke-width="2"/><line x1="60" y1="39" x2="60" y2="91" stroke="#aaa" stroke-width="2" stroke-dasharray="4 3"/><line x1="160" y1="83" x2="160" y2="47" stroke="#aaa" stroke-width="2" stroke-dasharray="4 3"/><circle cx="120" cy="65" r="3" fill="#f0c040"/><text x="115" y="60" fill="#eee" font-size="11">Z</text><text x="50" y="35" fill="#eee" font-size="11">A</text><text x="165" y="45" fill="#eee" font-size="11">B\'</text><text x="50" y="110" fill="#eee" font-size="11">B</text><text x="165" y="95" fill="#eee" font-size="11">A\'</text></svg>'
   },
   {
-    difficulty: 1,
-    question: 'V-Figur: ZA = 4, AA\u2032 = 8, ZB = 3.<br>Wie lang ist BB\u2032?',
+    question: 'V-Figur: <span class="seg">ZA</span> = 4, <span class="seg">AA\'</span> = 8, <span class="seg">ZB</span> = 3.<br>Wie lang ist <span class="seg">BB\'</span>?',
     options: ['4', '6', '8', '12'],
     correct: 1,
-    explanation: 'ZA / AA\u2032 = ZB / BB\u2032 \u2192 4/8 = 3/BB\u2032 \u2192 BB\u2032 = 6'
+    explanation: '<span class="seg">ZA</span> / <span class="seg">AA\'</span> = <span class="seg">ZB</span> / <span class="seg">BB\'</span> \u2192 4/8 = 3/x \u2192 x = 6',
+    svg: '<svg viewBox="0 0 240 130" width="100%" style="max-width:280px;height:auto"><line x1="20" y1="20" x2="220" y2="40" stroke="#aaa" stroke-width="2"/><line x1="20" y1="20" x2="220" y2="110" stroke="#aaa" stroke-width="2"/><line x1="80" y1="26" x2="80" y2="47" stroke="#aaa" stroke-width="2" stroke-dasharray="4 3"/><line x1="180" y1="36" x2="180" y2="92" stroke="#aaa" stroke-width="2" stroke-dasharray="4 3"/><circle cx="20" cy="20" r="3" fill="#f0c040"/><text x="15" y="15" fill="#eee" font-size="11">Z</text><text x="75" y="20" fill="#eee" font-size="11">A</text><text x="175" y="30" fill="#eee" font-size="11">A\'</text><text x="75" y="62" fill="#eee" font-size="11">B</text><text x="175" y="107" fill="#eee" font-size="11">B\'</text></svg>'
   },
   {
-    difficulty: 1,
     question: 'Der 1. Strahlensatz vergleicht Strecken...',
     options: ['auf den Parallelen', 'entlang der Strahlen', 'vom Zentrum zur Parallele', 'zwischen den Parallelen'],
     correct: 1,
-    explanation: '1. Strahlensatz = nur Strecken entlang der Strahlen vergleichen (keine Parallelenabschnitte).'
+    explanation: '1. Strahlensatz = nur Strecken entlang der Strahlen (keine Parallelenabschnitte).',
+    svg: '<svg viewBox="0 0 240 130" width="100%" style="max-width:280px;height:auto"><line x1="20" y1="30" x2="220" y2="40" stroke="#aaa" stroke-width="2"/><line x1="20" y1="30" x2="220" y2="100" stroke="#aaa" stroke-width="2"/><path d="M40,25 Q120,20 200,35" fill="none" stroke="#f0c040" stroke-width="2" marker-end="url(#arrow)"/><circle cx="20" cy="30" r="3" fill="#f0c040"/><text x="15" y="25" fill="#eee" font-size="11">Z</text></svg>'
   },
   {
-    difficulty: 2,
     question: 'Ein Stab (1,5 m) wirft 2 m Schatten.<br>Ein Baum wirft 10 m Schatten.<br>Wie hoch ist der Baum?',
     options: ['6 m', '7 m', '7,5 m', '8 m'],
     correct: 2,
-    explanation: '1,5 / 2 = h / 10 \u2192 h = 1,5 \u00d7 10 / 2 = 7,5 m'
+    explanation: '1,5 / 2 = h / 10 \u2192 h = 1,5 \u00d7 10 / 2 = 7,5 m',
+    svg: '<svg viewBox="0 0 240 130" width="100%" style="max-width:280px;height:auto"><line x1="10" y1="120" x2="230" y2="120" stroke="#aaa" stroke-width="2"/><line x1="40" y1="120" x2="40" y2="100" stroke="#eee" stroke-width="3"/><line x1="150" y1="120" x2="150" y2="40" stroke="#eee" stroke-width="5"/><line x1="40" y1="100" x2="230" y2="120" stroke="#f0c040" stroke-dasharray="4 2"/><line x1="150" y1="40" x2="230" y2="120" stroke="#f0c040" stroke-dasharray="4 2"/><text x="30" y="90" fill="#eee" font-size="10">1,5m</text><text x="140" y="30" fill="#eee" font-size="10">Baum</text></svg>'
   },
   {
-    difficulty: 2,
-    question: 'Ein Sch\u00fcler schreibt:<br><strong>AA\u2032 / ZA\u2032 = BB\u2032 / ZB\u2032</strong><br>Ist das richtig?',
-    options: ['Ja, das stimmt', 'Nein \u2014 richtig w\u00e4re ZA/ZA\u2032 = ZB/ZB\u2032', 'Ja, aber nur bei der X-Figur', 'Nein \u2014 richtig w\u00e4re AB/A\u2032B\u2032 = ZA/ZB'],
+    question: 'Ein Sch\u00fcler schreibt:<br><strong><span class="seg">AA\'</span> / <span class="seg">ZA\'</span> = <span class="seg">BB\'</span> / <span class="seg">ZB\'</span></strong><br>Ist das richtig?',
+    options: ['Ja, das stimmt', 'Nein \u2014 richtig w\u00e4re <span class="seg">ZA</span>/<span class="seg">ZA\'</span> = <span class="seg">ZB</span>/<span class="seg">ZB\'</span>', 'Ja, aber nur bei der X-Figur', 'Nein \u2014 richtig w\u00e4re <span class="seg">AB</span>/<span class="seg">A\'B\'</span> = <span class="seg">ZA</span>/<span class="seg">ZB</span>'],
     correct: 1,
-    explanation: 'Der 1. SS setzt ZA zu ZA\u2032 ins Verh\u00e4ltnis \u2014 nicht AA\u2032 zu ZA\u2032.'
+    explanation: 'Der 1. SS setzt <span class="seg">ZA</span> zu <span class="seg">ZA\'</span> ins Verh\u00e4ltnis \u2014 nicht <span class="seg">AA\'</span> zu <span class="seg">ZA\'</span>.',
+    svg: '<svg viewBox="0 0 240 130" width="100%" style="max-width:280px;height:auto"><line x1="20" y1="20" x2="220" y2="40" stroke="#aaa" stroke-width="2"/><line x1="20" y1="20" x2="220" y2="110" stroke="#aaa" stroke-width="2"/><line x1="80" y1="26" x2="80" y2="47" stroke="#e94560" stroke-width="2"/><line x1="180" y1="36" x2="180" y2="92" stroke="#e94560" stroke-width="2"/><circle cx="20" cy="20" r="3" fill="#f0c040"/></svg>'
   },
   {
-    difficulty: 2,
     question: 'Lochkamera: Licht geht durch ein Loch,<br>das Bild steht auf dem Kopf.<br>V-Figur oder X-Figur?',
     options: ['V-Figur', 'X-Figur', 'Beides m\u00f6glich', 'Keines davon'],
     correct: 1,
-    explanation: 'Das Loch ist Zentrum Z zwischen Objekt und Bild \u2192 X-Figur.'
+    explanation: 'Das Loch ist Zentrum Z zwischen Objekt und Bild \u2192 X-Figur.',
+    svg: '<svg viewBox="0 0 240 130" width="100%" style="max-width:280px;height:auto"><rect x="115" y="40" width="10" height="50" fill="#333" stroke="#aaa"/><circle cx="120" cy="65" r="2" fill="#fff"/><line x1="40" y1="40" x2="200" y2="90" stroke="#f0c040" stroke-width="1"/><line x1="40" y1="90" x2="200" y2="40" stroke="#f0c040" stroke-width="1"/><text x="30" y="35" fill="#eee" font-size="10">Objekt</text><text x="180" y="110" fill="#eee" font-size="10">Bild</text></svg>'
   },
   {
-    difficulty: 2,
     question: 'V-Figur mit Zentrum Z.<br>Welche Gleichung ist korrekt?',
-    options: ['ZA / ZB = ZA\u2032 / ZB\u2032', 'ZA / ZA\u2032 = ZB / ZB\u2032', 'AA\u2032 / BB\u2032 = ZA / ZB', 'AB / ZA = A\u2032B\u2032 / ZA\u2032'],
+    options: ['<span class="seg">ZA</span> / <span class="seg">ZB</span> = <span class="seg">ZA\'</span> / <span class="seg">ZB\'</span>', '<span class="seg">ZA</span> / <span class="seg">ZA\'</span> = <span class="seg">ZB</span> / <span class="seg">ZB\'</span>', '<span class="seg">AA\'</span> / <span class="seg">BB\'</span> = <span class="seg">ZA</span> / <span class="seg">ZB</span>', '<span class="seg">AB</span> / <span class="seg">ZA</span> = <span class="seg">A\'B\'</span> / <span class="seg">ZA\'</span>'],
     correct: 1,
-    explanation: '1. Strahlensatz: ZA / ZA\u2032 = ZB / ZB\u2032 (Strecken auf demselben Strahl).'
+    explanation: '1. Strahlensatz: <span class="seg">ZA</span> / <span class="seg">ZA\'</span> = <span class="seg">ZB</span> / <span class="seg">ZB\'</span> (Strecken auf demselben Strahl).',
+    svg: '<svg viewBox="0 0 240 130" width="100%" style="max-width:280px;height:auto"><line x1="20" y1="20" x2="220" y2="40" stroke="#aaa" stroke-width="2"/><line x1="20" y1="20" x2="220" y2="110" stroke="#aaa" stroke-width="2"/><line x1="80" y1="26" x2="80" y2="47" stroke="#aaa" stroke-width="2"/><line x1="180" y1="36" x2="180" y2="92" stroke="#aaa" stroke-width="2"/><circle cx="20" cy="20" r="3" fill="#f0c040"/></svg>'
   },
   {
-    difficulty: 3,
-    question: 'Gilt die Umkehrung des 2. Strahlensatzes?',
-    options: ['Ja, immer', 'Ja, aber nur bei V-Figuren', 'Nein', 'Nur wenn das Zentrum bekannt ist'],
-    correct: 2,
-    explanation: 'Die Umkehrung des 2. SS gilt NICHT \u2014 B\u2032 ist nicht eindeutig bestimmt.'
-  },
-  {
-    difficulty: 3,
-    question: 'Warum gilt die Umkehrung des 2. Strahlensatzes nicht?',
-    options: ['Weil der Winkel nicht eindeutig ist', 'Weil B\u2032 auf einem Kreis liegt \u2014 2 Schnittpunkte m\u00f6glich', 'Weil man das Zentrum nicht kennt', 'Weil nur V-Figuren funktionieren'],
+    question: 'V-Figur: <span class="seg">ZA</span> = 4, <span class="seg">ZA\'</span> = 6, <span class="seg">AB</span> = 5.<br>Wie lang ist <span class="seg">A\'B\'</span>?',
+    options: ['7', '7,5', '8', '9'],
     correct: 1,
-    explanation: 'Kreis um A\u2032 mit Radius |A\u2032B\u2032| schneidet den Strahl in 2 Punkten \u2192 nicht eindeutig.'
+    explanation: '2. SS: <span class="seg">AB</span>/<span class="seg">A\'B\'</span> = <span class="seg">ZA</span>/<span class="seg">ZA\'</span> \u2192 5/x = 4/6 \u2192 x = 7,5',
+    svg: '<svg viewBox="0 0 240 130" width="100%" style="max-width:280px;height:auto"><line x1="20" y1="20" x2="220" y2="40" stroke="#aaa" stroke-width="2"/><line x1="20" y1="20" x2="220" y2="110" stroke="#aaa" stroke-width="2"/><line x1="100" y1="28" x2="100" y2="58" stroke="#f0c040" stroke-width="2"/><line x1="180" y1="36" x2="180" y2="92" stroke="#f0c040" stroke-width="2"/><circle cx="20" cy="20" r="3" fill="#f0c040"/><text x="90" y="50" fill="#eee" font-size="11">5</text><text x="185" y="70" fill="#eee" font-size="11">?</text></svg>'
   },
   {
-    difficulty: 3,
-    question: 'Flussbreite (X-Figur):<br>ZA = 5 m, ZA\u2032 = 8 m, AB = 12 m.<br>Wie breit ist A\u2032B\u2032?',
+    question: 'Karte 1:25.000, Strecke auf Karte = 4 cm.<br>Wie lang ist die Strecke in Wirklichkeit?',
+    options: ['100 m', '1 km', '10 km', '4 km'],
+    correct: 1,
+    explanation: '4 \u00d7 25.000 = 100.000 cm = 1.000 m = 1 km',
+    svg: '<svg viewBox="0 0 240 130" width="100%" style="max-width:280px;height:auto"><rect x="40" y="30" width="160" height="70" fill="#16213e" stroke="#aaa"/><line x1="60" y1="65" x2="100" y2="65" stroke="#f0c040" stroke-width="2"/><text x="65" y="60" fill="#eee" font-size="10">4cm</text><text x="120" y="90" fill="#dim" font-size="10">Ma\u00dfstab 1:25000</text></svg>'
+  },
+  {
+    question: 'X-Figur: <span class="seg">ZA</span> = 3, <span class="seg">ZA\'</span> = 5, <span class="seg">ZB</span> = 9.<br>Wie lang ist <span class="seg">ZB\'</span>?',
+    options: ['12', '15', '18', '21'],
+    correct: 1,
+    explanation: '<span class="seg">ZA</span> / <span class="seg">ZA\'</span> = <span class="seg">ZB</span> / <span class="seg">ZB\'</span> \u2192 3/5 = 9/x \u2192 x = 15',
+    svg: '<svg viewBox="0 0 240 130" width="100%" style="max-width:280px;height:auto"><line x1="40" y1="30" x2="200" y2="100" stroke="#aaa" stroke-width="2"/><line x1="40" y1="100" x2="200" y2="30" stroke="#aaa" stroke-width="2"/><line x1="70" y1="43" x2="70" y2="87" stroke="#aaa" stroke-width="2" stroke-dasharray="4 3"/><line x1="170" y1="87" x2="170" y2="43" stroke="#aaa" stroke-width="2" stroke-dasharray="4 3"/><circle cx="120" cy="65" r="3" fill="#f0c040"/><text x="115" y="60" fill="#eee" font-size="11">Z</text></svg>'
+  },
+  {
+    question: 'Flussbreite (X-Figur):<br><span class="seg">ZA</span> = 5 m, <span class="seg">ZA\'</span> = 8 m, <span class="seg">AB</span> = 12 m.<br>Wie breit ist <span class="seg">A\'B\'</span>?',
     options: ['15 m', '19,2 m', '16 m', '20 m'],
     correct: 1,
-    explanation: 'AB / A\u2032B\u2032 = ZA / ZA\u2032 \u2192 12 / x = 5 / 8 \u2192 x = 96/5 = 19,2 m'
-  },
-  {
-    difficulty: 3,
-    question: 'ZA = 6, ZA\u2032 = 9, ZB = 8, ZB\u2032 = 12.<br>Ist AB \u2225 A\u2032B\u2032?',
-    options: ['Ja', 'Nein', 'Kann man nicht entscheiden', 'Nur bei V-Figur'],
-    correct: 0,
-    explanation: '6/9 = 2/3 und 8/12 = 2/3 \u2192 gleich \u2192 AB \u2225 A\u2032B\u2032 (Umkehrung 1. SS).'
+    explanation: '<span class="seg">AB</span> / <span class="seg">A\'B\'</span> = <span class="seg">ZA</span> / <span class="seg">ZA\'</span> \u2192 12 / x = 5 / 8 \u2192 x = 96/5 = 19,2 m',
+    svg: '<svg viewBox="0 0 240 130" width="100%" style="max-width:280px;height:auto"><path d="M0,40 Q120,30 240,40 L240,90 Q120,100 0,90 Z" fill="#16213e" stroke="#4ecca3"/><line x1="60" y1="20" x2="180" y2="110" stroke="#aaa" stroke-width="2"/><line x1="180" y1="20" x2="60" y2="110" stroke="#aaa" stroke-width="2"/><circle cx="120" cy="65" r="3" fill="#f0c040"/></svg>'
   }
 ];
 
@@ -369,6 +364,7 @@ const state = {
   hostConn: null,    // player: connection to host
   playerName: '',
   currentQ: 0,
+  shuffledQ: [],
   bossHP: 100,
   bossMaxHP: 100,
   timerInterval: null,
@@ -464,6 +460,13 @@ function startGame() {
   state.currentQ = 0;
   state.questionResults = [];
 
+  // Shuffle questions
+  state.shuffledQ = [...questions];
+  for (let i = state.shuffledQ.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [state.shuffledQ[i], state.shuffledQ[j]] = [state.shuffledQ[j], state.shuffledQ[i]];
+  }
+
   showScreen('host-game');
   document.getElementById('room-mini').textContent = 'Code: ' + state.roomCode;
 
@@ -477,16 +480,11 @@ function startGame() {
 }
 
 function showHostQuestion() {
-  const q = questions[state.currentQ];
-  const diffLabels = { 1: 'AFB I', 2: 'AFB II', 3: 'AFB III' };
-  const diffClasses = { 1: 'afb1', 2: 'afb2', 3: 'afb3' };
-
-  const badge = document.getElementById('host-diff-badge');
-  badge.textContent = diffLabels[q.difficulty];
-  badge.className = 'diff-badge ' + diffClasses[q.difficulty];
+  const q = state.shuffledQ[state.currentQ];
 
   document.getElementById('round-num').textContent = state.currentQ + 1;
   document.getElementById('host-question').innerHTML = q.question;
+  document.getElementById('host-svg').innerHTML = q.svg || '';
   document.getElementById('host-explanation').style.display = 'none';
   document.getElementById('btn-reveal').style.display = 'inline-flex';
   document.getElementById('btn-next').style.display = 'none';
@@ -519,13 +517,13 @@ function resetRoundState() {
 }
 
 function broadcastQuestion() {
-  const q = questions[state.currentQ];
+  const q = state.shuffledQ[state.currentQ];
   const msg = {
     type: 'question',
     index: state.currentQ,
     question: q.question,
     options: q.options,
-    difficulty: q.difficulty
+    svg: q.svg
   };
   state.connections.forEach(c => {
     try { c.send(msg); } catch (e) {}
@@ -535,7 +533,7 @@ function broadcastQuestion() {
 function handlePlayerMessage(conn, data) {
   if (data.type === 'answer' && data.index === state.currentQ && !state.roundRevealed) {
     state.answered++;
-    const q = questions[state.currentQ];
+    const q = state.shuffledQ[state.currentQ];
     const isCorrect = data.answer === q.correct;
 
     if (isCorrect) {
@@ -627,7 +625,7 @@ function revealAnswer() {
   state.roundRevealed = true;
   clearTimer();
 
-  const q = questions[state.currentQ];
+  const q = state.shuffledQ[state.currentQ];
   // Highlight correct option
   const correctEl = document.getElementById('host-opt-' + q.correct);
   if (correctEl) correctEl.classList.add('correct');
@@ -750,7 +748,7 @@ function showSummary() {
   );
 
   sorted.forEach(r => {
-    const q = questions[r.index];
+    const q = state.shuffledQ[r.index];
     const acc = r.total > 0 ? Math.round((r.correct / r.total) * 100) : 0;
     const div = document.createElement('div');
     div.className = 'summary-item';
@@ -873,13 +871,8 @@ function showPlayerQuestion(data) {
   showScreen('player-game');
   state.playerAnswered = false;
 
-  const diffLabels = { 1: 'AFB I', 2: 'AFB II', 3: 'AFB III' };
-  const diffClasses = { 1: 'afb1', 2: 'afb2', 3: 'afb3' };
-  const badge = document.getElementById('player-diff-badge');
-  badge.textContent = diffLabels[data.difficulty];
-  badge.className = 'diff-badge ' + diffClasses[data.difficulty];
-
   document.getElementById('player-question').innerHTML = data.question;
+  document.getElementById('player-svg').innerHTML = data.svg || '';
   document.getElementById('player-feedback').textContent = '';
   document.getElementById('player-feedback').className = 'player-feedback';
   document.getElementById('player-waiting').textContent = '';
@@ -925,9 +918,6 @@ function showPlayerResult(data) {
     fb.className = 'player-feedback wrong-fb';
   }
   document.getElementById('player-waiting').textContent = 'Warte auf n\u00e4chste Frage...';
-
-  const hpPct = Math.round((data.hp / data.maxHp) * 100);
-  document.getElementById('player-hp-mini').textContent = 'Boss-HP: ' + hpPct + '%';
 }
 
 function showPlayerReveal(data) {
